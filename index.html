@@ -96,13 +96,16 @@
   .hero-logo-text {
     font-family: 'Syne', sans-serif;
     font-weight: 800;
-    font-size: clamp(4rem, 14vw, 10rem);
+    font-size: clamp(3.2rem, 18vw, 10rem);
     letter-spacing: 0.06em;
     color: var(--white);
     line-height: 1;
     position: relative;
     z-index: 1;
-    text-shadow: 0 0 60px rgba(41,121,255,0.3), 0 0 120px rgba(0,245,160,0.15);
+    text-align: center;
+    width: 100%;
+    display: block;
+    text-shadow: 0 0 60px rgba(41,121,255,0.45), 0 0 120px rgba(0,245,160,0.2);
   }
   .hero-logo-text span { color: var(--green); }
 
@@ -116,9 +119,11 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 120px 24px 80px;
+    padding: 120px 20px 80px;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+    overflow: hidden;
   }
 
   .hero-badge {
@@ -154,8 +159,11 @@
 
   .logo-wrap {
     position: relative;
-    width: auto;
+    width: 100%;
     margin: 0 auto 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
     animation: fadeUp 1s 0.4s forwards;
   }
