@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>BlendX — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #07080f;
+  color: #eef0f8;
+  font-family: 'DM Sans', sans-serif;
+}
+
+:root {
+  --bg:     #07080f;
+  --bg2:    #0b0d1c;
+  --cyan:   #00f5a0;
+  --blue:   #2979ff;
+  --silver: #c0c8dc;
+  --border: rgba(255,255,255,0.08);
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(7,8,15,0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+  color: #eef0f8;
+  text-decoration: none;
+}
+.nav-logo span { color: var(--cyan); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--silver);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  padding: 7px 18px;
+  border-radius: 2px;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+.back-btn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,245,160,0.05);
+}
+.back-btn svg { transition: transform 0.2s; }
+.back-btn:hover svg { transform: translateX(-3px); }
+
+.nav-count {
+  font-size: 0.72rem;
+  color: var(--silver);
+  letter-spacing: 0.06em;
+}
+.nav-count span { color: var(--cyan); font-weight: 600; }
+
+/* ── COLLAGE CONTAINER ── */
+#collage-wrap {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 60px; /* nav height */
+}
+
+#collage {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+  display: grid;
+  /* Grid defined by JS based on image count & viewport */
+  gap: 3px;
+  background: var(--bg);
+}
+
+.collage-item {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg2);
+}
+.collage-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), filter 0.4s;
+}
+.collage-item:hover img {
+  transform: scale(1.06);
+  filter: brightness(1.1);
+}
+.collage-item-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7,8,15,0.55) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  align-items: flex-end;
+  padding: 14px;
+}
+.collage-item:hover .collage-item-overlay {
+  opacity: 1;
+}
+.collage-item-overlay span {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.8);
+}
+
+/* Loading state */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 500;
+  transition: opacity 0.5s;
+}
+.loading-screen.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  letter-spacing: 0.08em;
+  color: #eef0f8;
+}
+.loader-logo span { color: var(--cyan); }
+.loader-bar-wrap {
+  width: 160px;
+  height: 2px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader-bar {
+  height: 100%;
+  background: var(--cyan);
+  width: 0%;
+  border-radius: 2px;
+  transition: width 0.3s;
+  box-shadow: 0 0 10px var(--cyan);
+}
+.loader-text {
+  font-size: 0.72rem;
+  color: var(--silver);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── LIGHTBOX ── */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  background: rgba(7,8,15,0.97);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1);
+  backdrop-filter: blur(4px);
+}
+#lightbox.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.lb-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  background: rgba(7,8,15,0.7);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+
+.lb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--silver);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  padding: 7px 18px;
+  border-radius: 2px;
+  background: transparent;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.lb-back:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,245,160,0.05);
+}
+.lb-back svg { transition: transform 0.2s; }
+.lb-back:hover svg { transform: translateX(-3px); }
+
+.lb-counter {
+  font-size: 0.75rem;
+  color: var(--silver);
+  letter-spacing: 0.08em;
+}
+.lb-counter strong { color: var(--cyan); }
+
+.lb-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lb-arrow {
+  width: 40px; height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--silver);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.lb-arrow:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,245,160,0.05);
+}
+
+.lb-img-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px 20px;
+}
+.lb-img-wrap img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 3px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+  transition: opacity 0.25s;
+}
+.lb-img-wrap img.fade { opacity: 0; }
+
+/* Keyboard hint */
+.lb-hint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: var(--border);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Empty state */
+.empty-state {
+  position: fixed;
+  inset: 0;
+  padding-top: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  padding: 100px 40px 40px;
+}
+.empty-state h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #eef0f8;
+}
+.empty-state p {
+  color: var(--silver);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 480px;
+}
+.empty-code {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 24px;
+  font-size: 0.8rem;
+  color: var(--cyan);
+  font-family: monospace;
+  letter-spacing: 0.05em;
+  text-align: left;
+  line-height: 1.8;
+  max-width: 440px;
+  width: 100%;
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loader-logo">BLEND<span>X</span></div>
+  <div class="loader-bar-wrap">
+    <div class="loader-bar" id="loaderBar"></div>
+  </div>
+  <div class="loader-text" id="loaderText">Curating your portfolio…</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">BLEND<span>X</span></a>
+  <div class="nav-right">
+    <span class="nav-count" id="navCount"></span>
+    <a href="index.html" class="back-btn">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back to Site
+    </a>
+  </div>
+</nav>
+
+<!-- COLLAGE -->
+<div id="collage-wrap">
+  <div id="collage"></div>
+</div>
+
+<!-- EMPTY STATE (shown if no images found) -->
+<div class="empty-state" id="emptyState" style="display:none">
+  <h2>Portfolio Coming Soon</h2>
+  <p>
+    Add your images to the <strong style="color:var(--cyan)">portfolio_imgs/</strong> folder
+    next to this file. Supported formats: JPG, JPEG, PNG, WEBP, GIF.
+  </p>
+  <div class="empty-code">
+    📁 your-website/<br>
+    &nbsp;&nbsp;├── index.html<br>
+    &nbsp;&nbsp;├── portfolio.html<br>
+    &nbsp;&nbsp;└── portfolio_imgs/<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── photo-01.jpg<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── photo-02.jpg<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── …
+  </div>
+  <a href="index.html" class="back-btn" style="margin-top:8px">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path d="M19 12H5M12 5l-7 7 7 7"/>
+    </svg>
+    Back to Site
+  </a>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <div class="lb-top">
+    <button class="lb-back" onclick="closeLightbox()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+      Back to All
+    </button>
+    <span class="lb-counter" id="lbCounter"><strong>1</strong> / 1</span>
+    <div class="lb-nav">
+      <button class="lb-arrow" onclick="lbStep(-1)" title="Previous (←)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <button class="lb-arrow" onclick="lbStep(1)" title="Next (→)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="lb-img-wrap">
+    <img id="lbImg" src="" alt="Portfolio image">
+  </div>
+  <div class="lb-hint">← → arrow keys to navigate &nbsp;·&nbsp; ESC to close</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CONFIGURATION
+   List your images in portfolio_imgs/ here.
+   The page will shuffle them randomly on every load.
+════════════════════════════════════════════════════════ */
+const IMAGE_FILES = [
+  /* Add your filenames here, e.g.: */
+  /* 'photo-01.jpg', */
+  /* 'shoot-02.jpeg', */
+  /* 'product-03.png', */
+  'photo_01.jpeg',
+  'photo_02.jpeg',
+  'photo_03.jpeg',
+  'photo_04.jpeg',
+  'photo_05.jpeg',
+  'photo_06.jpeg',
+  'photo_07.jpeg',
+  'photo_08.jpeg',
+  'photo_09.jpeg',
+  'photo_10.jpeg',
+  'photo_11.jpeg',
+  'photo_12.jpeg',
+  'photo_13.jpeg',
+  'photo_14.jpeg',
+  'photo_15.jpeg',
+  'photo_16.jpeg',
+  'photo_17.jpeg',
+  'photo_18.jpeg',
+  'photo_19.jpeg',
+  'photo_20.jpeg',
+  'photo_21.jpeg',
+  'photo_22.jpeg',
+  'photo_23.jpeg',
+  'photo_24.jpeg',
+  'photo_25.jpeg',
+  'photo_26.jpeg',
+  'photo_27.jpeg',
+  'photo_28.jpeg',
+  'photo_29.jpeg',
+  'photo_30.jpeg',
+  'photo_31.jpeg',
+  'photo_32.jpeg',
+  'photo_33.jpeg',
+  'photo_34.jpeg',
+  'photo_35.jpeg',
+  'photo_36.jpeg',
+  'photo_37.jpeg',
+  'photo_38.jpeg',
+  'photo_39.jpeg',
+  'photo_40.jpeg',
+  'photo_41.jpeg',
+  'photo_42.jpeg',
+  'photo_43.jpeg',
+  'photo_44.jpeg',
+  'photo_45.jpeg',
+  'photo_46.jpeg',
+  'photo_47.jpeg',
+  'photo_48.jpeg',
+  'photo_49.jpeg',
+  'photo_50.jpeg',
+  'photo_51.jpeg',
+  'photo_52.jpeg',
+  'photo_53.jpeg',
+  'photo_54.jpeg',
+  'photo_55.jpeg',
+  'photo_56.jpeg',
+  'photo_57.jpeg',
+  'photo_58.jpeg',
+  'photo_59.jpeg',
+  'photo_60.jpeg',
+  'photo_61.jpeg',
+  'photo_62.jpeg',
+  'photo_63.jpeg',
+  'photo_64.jpeg',
+  'photo_65.jpeg',
+  'photo_66.jpeg',
+  'photo_67.jpeg',
+  'photo_68.jpeg',
+  'photo_69.jpeg',
+  'photo_70.jpeg',
+  'photo_71.jpeg',
+  'photo_72.jpeg',
+  'photo_73.jpeg',
+  'photo_74.jpeg',
+  'photo_75.jpeg',
+  'photo_76.jpeg',
+  'photo_77.jpeg',
+  'photo_78.jpeg',
+  'photo_79.jpeg',
+  'photo_80.jpeg',
+  'photo_81.jpeg',
+  'photo_82.jpeg',
+  'photo_83.jpeg',
+  'photo_84.jpeg',
+  'photo_85.jpeg',
+  'photo_86.jpeg',
+  'photo_87.jpeg',
+  'photo_88.jpeg',
+  'photo_89.jpeg',
+  'photo_90.jpeg',
+  'photo_91.jpeg',
+  'photo_92.jpeg',
+  'photo_93.jpeg',
+  'photo_94.jpeg',
+  'photo_95.jpeg',
+  'photo_96.jpeg',
+  'photo_97.jpeg',
+  'photo_98.jpeg',
+  'photo_99.jpeg',
+  'photo_100.jpeg',
+  'photo_101.jpeg',
+  'photo_102.jpeg',
+  'photo_103.jpeg',
+  'photo_104.jpeg',
+  'photo_105.jpeg',
+  'photo_106.jpeg',
+  'photo_107.jpeg',
+  'photo_108.jpeg',
+  'photo_109.jpeg',
+  'photo_110.jpeg',
+  'photo_111.jpeg',
+  'photo_112.jpeg',
+  'photo_113.jpeg',
+  'photo_114.jpeg',
+  'photo_115.jpeg',
+  'photo_116.jpeg',
+  'photo_117.jpeg',
+  'photo_118.jpeg',
+  'photo_119.jpeg',
+  'photo_120.jpeg',
+  'photo_121.jpeg',
+  'photo_122.jpeg',
+  'photo_123.jpeg',
+  'photo_124.jpeg',
+  'photo_125.jpeg',
+  'photo_126.jpeg',
+  'photo_127.jpeg',
+  'photo_128.jpeg',
+  'photo_129.jpeg',
+  'photo_130.jpeg',
+  'photo_131.jpeg',
+  'photo_132.jpeg',
+];
+
+const FOLDER = 'portfolio_imgs/';
+
+/* ════════════════════════════════════════════════════════
+   SHUFFLE (Fisher-Yates) — different order every load
+════════════════════════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ════════════════════════════════════════════════════════
+   MASONRY / COLLAGE GRID LAYOUT
+   Uses CSS Grid with random span sizes for variety
+════════════════════════════════════════════════════════ */
+function getGridConfig() {
+  const vw = window.innerWidth;
+  if (vw < 480)  return { cols: 2, rows: 2 };
+  if (vw < 768)  return { cols: 3, rows: 2 };
+  if (vw < 1200) return { cols: 4, rows: 3 };
+  return                { cols: 5, rows: 3 };
+}
+
+/* Generate a random span (1 or 2) that keeps total cols filled */
+function buildSpanPattern(count, cols) {
+  // Each item gets a colSpan and rowSpan
+  // We want visual variety but complete fill
+  const patterns = [];
+  // Seed with some big tiles, rest are 1x1
+  const bigSlots = new Set();
+  const numBig = Math.min(Math.floor(count * 0.25), Math.floor(count / 4));
+  while (bigSlots.size < numBig) {
+    bigSlots.add(Math.floor(Math.random() * count));
+  }
+  for (let i = 0; i < count; i++) {
+    const big = bigSlots.has(i);
+    patterns.push({
+      colSpan: big ? 2 : 1,
+      rowSpan: big ? 2 : 1,
+    });
+  }
+  return patterns;
+}
+
+let images = [];    // shuffled list
+let lbIndex = 0;   // current lightbox index
+
+function buildCollage(files) {
+  images = shuffle(files);
+  const collage = document.getElementById('collage');
+  const { cols, rows } = getGridConfig();
+  const vh = window.innerHeight - 60; // minus nav
+  const cellH = Math.floor(vh / rows);
+
+  // Set grid
+  collage.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  collage.style.gridAutoRows = cellH + 'px';
+  collage.style.minHeight = 'unset';
+  collage.innerHTML = '';
+
+  const patterns = buildSpanPattern(images.length, cols);
+
+  images.forEach((src, idx) => {
+    const item = document.createElement('div');
+    item.className = 'collage-item';
+    const p = patterns[idx];
+    if (p.colSpan > 1) item.style.gridColumn = `span ${p.colSpan}`;
+    if (p.rowSpan > 1) item.style.gridRow    = `span ${p.rowSpan}`;
+
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = `Portfolio image ${idx + 1}`;
+    img.loading = 'lazy';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'collage-item-overlay';
+    const label = document.createElement('span');
+    label.textContent = `${idx + 1} / ${images.length}`;
+    overlay.appendChild(label);
+
+    item.appendChild(img);
+    item.appendChild(overlay);
+    item.addEventListener('click', () => openLightbox(idx));
+
+    collage.appendChild(item);
+  });
+
+  document.getElementById('navCount').innerHTML =
+    `<span>${images.length}</span> image${images.length !== 1 ? 's' : ''}`;
+}
+
+/* Re-layout on resize without re-shuffling */
+function relayout() {
+  const collage = document.getElementById('collage');
+  if (!collage.children.length) return;
+  const { cols, rows } = getGridConfig();
+  const vh = window.innerHeight - 60;
+  const cellH = Math.floor(vh / rows);
+  collage.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  collage.style.gridAutoRows = cellH + 'px';
+}
+window.addEventListener('resize', relayout);
+
+/* ════════════════════════════════════════════════════════
+   LIGHTBOX
+════════════════════════════════════════════════════════ */
+const lb    = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+
+function openLightbox(idx) {
+  lbIndex = idx;
+  lbImg.src = images[idx];
+  updateLbCounter();
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  lb.classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(() => { lbImg.src = ''; }, 350);
+}
+
+function lbStep(dir) {
+  lbImg.classList.add('fade');
+  setTimeout(() => {
+    lbIndex = (lbIndex + dir + images.length) % images.length;
+    lbImg.src = images[lbIndex];
+    updateLbCounter();
+    lbImg.onload = () => lbImg.classList.remove('fade');
+    // fallback if already cached
+    if (lbImg.complete) lbImg.classList.remove('fade');
+  }, 200);
+}
+
+function updateLbCounter() {
+  document.getElementById('lbCounter').innerHTML =
+    `<strong>${lbIndex + 1}</strong> / ${images.length}`;
+}
+
+/* Keyboard navigation */
+document.addEventListener('keydown', e => {
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') lbStep(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   lbStep(-1);
+  if (e.key === 'Escape') closeLightbox();
+});
+
+/* Click outside image to close */
+lb.addEventListener('click', e => {
+  if (e.target === lb || e.target.classList.contains('lb-img-wrap')) closeLightbox();
+});
+
+/* ════════════════════════════════════════════════════════
+   INIT — load images with progress simulation
+════════════════════════════════════════════════════════ */
+async function init() {
+  const loaderBar  = document.getElementById('loaderBar');
+  const loaderText = document.getElementById('loaderText');
+  const loading    = document.getElementById('loadingScreen');
+
+  // Animate loader bar
+  let pct = 0;
+  const tickLoader = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 18, 85);
+    loaderBar.style.width = pct + '%';
+  }, 120);
+
+  // Build full paths
+  const fullPaths = IMAGE_FILES.map(f => FOLDER + f);
+
+  // If no images configured, try to detect common names
+  let filesToUse = fullPaths;
+
+  if (filesToUse.length === 0) {
+    // Show empty state
+    clearInterval(tickLoader);
+    loading.classList.add('hide');
+    setTimeout(() => { loading.style.display = 'none'; }, 500);
+    document.getElementById('emptyState').style.display = 'flex';
+    return;
+  }
+
+  // Preload first batch for snappy display
+  const preloadCount = Math.min(6, filesToUse.length);
+  const preloads = filesToUse.slice(0, preloadCount).map(src => new Promise(res => {
+    const i = new Image(); i.onload = i.onerror = res; i.src = src;
+  }));
+  await Promise.all(preloads);
+
+  clearInterval(tickLoader);
+  loaderBar.style.width = '100%';
+  loaderText.textContent = 'Opening gallery…';
+
+  setTimeout(() => {
+    buildCollage(filesToUse);
+    loading.classList.add('hide');
+    setTimeout(() => { loading.style.display = 'none'; }, 500);
+  }, 300);
+}
+
+init();
+</script>
+</body>
+</html>
